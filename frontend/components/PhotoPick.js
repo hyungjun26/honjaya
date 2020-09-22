@@ -12,8 +12,13 @@ export default function PhotoPick({ state, setState }) {
       return;
     }
 
-    let pickerResult = await ImagePicker.launchImageLibraryAsync();
-    console.log(pickerResult.uri);
+    let pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: false,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    console.log(pickerResult);
     setState(pickerResult.uri);
   };
 

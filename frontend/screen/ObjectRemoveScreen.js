@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import StepIndicator from "react-native-step-indicator";
 import Swiper from "react-native-swiper";
+import PhotoPick from "../components/PhotoPick";
 
 const thirdIndicatorStyles = {
   stepIndicatorSize: 25,
@@ -26,7 +27,7 @@ const thirdIndicatorStyles = {
   labelSize: 10,
   currentStepLabelColor: "#7eaec4",
 };
-const STEP = [0, 1, 2, 3];
+const STEP = [0];
 
 function ObjectRemoveScreen() {
   const [currentPage, setCurrentPage] = useState(0);
@@ -37,7 +38,15 @@ function ObjectRemoveScreen() {
     setCurrentPage(position);
   };
 
-  const renderViewPage = (data) => {};
+  const renderViewPage = (data) => {
+    if (data === 0) {
+      return (
+        <View key={data} style={styles.container}>
+          <PhotoPick state={targetImg} setState={setTargetImg} />
+        </View>
+      );
+    }
+  };
 
   const renderStepIndicator = (params) => (
     <MaterialIcons {...getStepIndicatorIconConfig(params)} />
@@ -83,7 +92,7 @@ function ObjectRemoveScreen() {
           setCurrentPage(page);
         }}
       >
-        {STEP.map((step) => renderViewPage(step))}
+        {renderViewPage(0)}
       </Swiper>
     </View>
   );
