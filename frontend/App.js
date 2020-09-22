@@ -1,5 +1,5 @@
 import * as React from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, StackActions } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 
@@ -8,10 +8,12 @@ import Icon from "react-native-vector-icons/Entypo";
 import HomeScreen from "./screen/HomeScreen";
 import AboutScreen from "./screen/AboutScreen";
 import GuideScreen from "./screen/GuideScreen";
+import ObjectRemoveScreen from "./screen/ObjectRemoveScreen";
 
 const HomeStack = createStackNavigator();
 const AboutStack = createStackNavigator();
 const GuideStack = createStackNavigator();
+const RemoveStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
 const HomeStackScreen = ({ navigation }) => (
@@ -107,6 +109,37 @@ const GuideStackScreen = ({ navigation }) => (
   </GuideStack.Navigator>
 );
 
+const RemoveStackScreen = ({ navigation }) => (
+  <RemoveStack.Navigator
+    screenOptions={{
+      headerStyle: {
+        backgroundColor: "#01A9DB",
+      },
+      headerTintColor: "#fff",
+      headerTitleStyle: {
+        fontWeight: "bold",
+      },
+    }}
+  >
+    <RemoveStack.Screen
+      name="Remove Object"
+      component={ObjectRemoveScreen}
+      options={{
+        headerLeft: () => (
+          <Icon.Button
+            name="menu"
+            size={25}
+            backgroundColor="#01A9DB"
+            onPress={() => {
+              navigation.openDrawer();
+            }}
+          />
+        ),
+      }}
+    />
+  </RemoveStack.Navigator>
+);
+
 export default function App() {
   return (
     <NavigationContainer>
@@ -114,21 +147,8 @@ export default function App() {
         <Drawer.Screen name="Home" component={HomeStackScreen} />
         <Drawer.Screen name="About" component={AboutStackScreen} />
         <Drawer.Screen name="Guide" component={GuideStackScreen} />
+        <Drawer.Screen name="Object Remove" component={RemoveStackScreen} />
       </Drawer.Navigator>
-      {/* <Stack.Navigator
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: "#01A9DB",
-          },
-          headerTintColor: "#fff",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-        }}
-      >
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="About" component={AboutScreen} />
-      </Stack.Navigator> */}
     </NavigationContainer>
   );
 }
