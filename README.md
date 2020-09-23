@@ -22,4 +22,4 @@ python eval.py --trained_model=weights/yolact_base_54_800000.pth --score_thresho
 ```
 
 ## Contribute
-[CONTRIBUTUING](./CONTRIBUTING.md)
+[CONTRIBUTUING](./CONTRIBUTING.md)asd
