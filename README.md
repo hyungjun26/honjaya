@@ -10,8 +10,7 @@
 * [yolact
 ](https://github.com/tristan3716/yolact)
 a
-## Setup
-``` sh
+## Setupasd
 git clone --recursive https://lab.ssafy.com/s03-ai-sub2/s03p23a409.git
 ```
 
