@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import StepIndicator from "react-native-step-indicator";
 import Swiper from "react-native-swiper";
+
 import PhotoPick from "../components/PhotoPick";
+import ObjectDetect from "../components/ObjectDetect";
+import AdditionalImge from "../components/AdditionalImage";
+import CompleteSave from "../components/CompleteSave";
 
 const thirdIndicatorStyles = {
   stepIndicatorSize: 25,
@@ -27,11 +31,11 @@ const thirdIndicatorStyles = {
   labelSize: 10,
   currentStepLabelColor: "#7eaec4",
 };
-const STEP = [0];
+const STEP = [0, 1, 2, 3];
 
 function ObjectRemoveScreen() {
   const [currentPage, setCurrentPage] = useState(0);
-  const [targetImg, setTargetImg] = useState("../images/picture-plus.png");
+  const [targetImg, setTargetImg] = useState("");
 
   const onStepPress = (position) => {
     console.log(position);
@@ -43,6 +47,24 @@ function ObjectRemoveScreen() {
       return (
         <View key={data} style={styles.container}>
           <PhotoPick state={targetImg} setState={setTargetImg} />
+        </View>
+      );
+    } else if (data === 1) {
+      return (
+        <View key={data} style={styles.container}>
+          <ObjectDetect state={targetImg} />
+        </View>
+      );
+    } else if (data === 2) {
+      return (
+        <View key={data} style={styles.container}>
+          <AdditionalImge />
+        </View>
+      );
+    } else if (data === 3) {
+      return (
+        <View key={data} style={styles.container}>
+          <CompleteSave />
         </View>
       );
     }
@@ -87,12 +109,13 @@ function ObjectRemoveScreen() {
         loop={false}
         index={currentPage}
         autoplay={false}
+        showsPagination={false}
         showsButtons
         onIndexChanged={(page) => {
           setCurrentPage(page);
         }}
       >
-        {renderViewPage(0)}
+        {STEP.map((step) => renderViewPage(step))}
       </Swiper>
     </View>
   );
