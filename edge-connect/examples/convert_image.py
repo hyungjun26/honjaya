@@ -7,7 +7,10 @@ for file in file_list:
     # origin imager
     L_image = Image.open(path + str(file))
     print(str(file), L_image)
-    out = L_image.convert("RGB")
+    ratio = L_image.size[1] / L_image.size[0]
+    print(round(ratio * 256, 0))
+    img_resize = L_image.resize((256, 256))
+    out = img_resize.convert("RGB")
 
     # convert image
     if(str(file).endswith('mask.png')):
