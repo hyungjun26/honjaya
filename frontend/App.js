@@ -9,6 +9,7 @@ import HomeScreen from "./screen/HomeScreen";
 import AboutScreen from "./screen/AboutScreen";
 import GuideScreen from "./screen/GuideScreen";
 import ObjectRemoveScreen from "./screen/ObjectRemoveScreen";
+import CameraView from "./components/CameraView";
 import ResultScreen from "./screen/ResultScreen";
 
 const HomeStack = createStackNavigator();
@@ -124,7 +125,7 @@ const RemoveStackScreen = ({ navigation }) => (
     }}
   >
     <RemoveStack.Screen
-      name="Remove Object"
+      name="Object Remove"
       component={ObjectRemoveScreen}
       options={{
         headerLeft: () => (
@@ -181,7 +182,7 @@ export default function App() {
         <Drawer.Screen name="About" component={AboutStackScreen} />
         <Drawer.Screen name="Guide" component={GuideStackScreen} />
         <Drawer.Screen name="Object Remove" component={RemoveStackScreen} />
-        <Drawer.Screen name="Result" component={ResultStackScreen} />
+        <Drawer.Screen name="Camera" component={CameraView} />
       </Drawer.Navigator>
     </NavigationContainer>
   );

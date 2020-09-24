@@ -1,25 +1,42 @@
 import React from "react";
-import { Button, Image, StyleSheet, Text, TouchableOpacity, View , Alert } from "react-native";
+import {
+  Button,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Alert,
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
-export default function Result({navigation  }) {
+export default function Result({ navigation }) {
   const HomeScreen = async () => {
     navigation.navigate("Home");
   };
   return (
     <View style={styles.container}>
-      <Image source={{ uri: "asset:/favicon.png" }} style={styles.logo} resizeMode="contain" />
+      <Image
+        source={{ uri: "asset:/favicon.png" }}
+        style={styles.logo}
+        resizeMode="contain"
+      />
       <Text style={styles.instructions}>완성되었습니다.</Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={HomeScreen} style={styles.button}>
           <Text style={styles.buttonText}>취소</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => Alert.alert('저장되었습니다','갤러리를 확인해주세요!',[
-          {
-            text : 'ok' , onPress : HomeScreen
-          },
-        ],
-        )} style={styles.button}>
+        <TouchableOpacity
+          onPress={() =>
+            Alert.alert("저장되었습니다", "갤러리를 확인해주세요!", [
+              {
+                text: "ok",
+                onPress: HomeScreen,
+              },
+            ])
+          }
+          style={styles.button}
+        >
           <Text style={styles.buttonText}>저장</Text>
         </TouchableOpacity>
       </View>

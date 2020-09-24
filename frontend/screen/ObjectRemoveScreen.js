@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import StepIndicator from "react-native-step-indicator";
 import Swiper from "react-native-swiper";
+
 import PhotoPick from "../components/PhotoPick";
+import ObjectDetect from "../components/ObjectDetect";
+import Result from "../components/Result";
+import ObjectSelect from "../components/ObjectSelect";
 
 const thirdIndicatorStyles = {
   stepIndicatorSize: 25,
@@ -27,11 +31,11 @@ const thirdIndicatorStyles = {
   labelSize: 10,
   currentStepLabelColor: "#7eaec4",
 };
-const STEP = [0];
+const STEP = [0, 1, 2, 3];
 
-function ObjectRemoveScreen() {
+function ObjectRemoveScreen({ navigation }) {
   const [currentPage, setCurrentPage] = useState(0);
-  const [targetImg, setTargetImg] = useState("../images/picture-plus.png");
+  const [targetImg, setTargetImg] = useState("/img/picture-plus.png");
 
   const onStepPress = (position) => {
     console.log(position);
@@ -42,7 +46,33 @@ function ObjectRemoveScreen() {
     if (data === 0) {
       return (
         <View key={data} style={styles.container}>
-          <PhotoPick state={targetImg} setState={setTargetImg} />
+          <PhotoPick
+            state={targetImg}
+            setState={setTargetImg}
+            navigation={navigation}
+          />
+        </View>
+      );
+    } else if (data === 1) {
+      return (
+        <View key={data} style={styles.container}>
+          <ObjectDetect
+            state={targetImg}
+            setCurrentPage={setCurrentPage}
+            currentPage={currentPage}
+          />
+        </View>
+      );
+    } else if (data === 2) {
+      return (
+        <View key={data} style={styles.container}>
+          <ObjectSelect state={targetImg} />
+        </View>
+      );
+    } else if (data === 3) {
+      return (
+        <View key={data} style={styles.container}>
+          <Result navigation={navigation} />
         </View>
       );
     }
@@ -75,8 +105,8 @@ function ObjectRemoveScreen() {
           currentPosition={currentPage}
           labels={[
             "사진\n가져오기",
-            "오브젝트 선택",
-            "추가이미지\n가져오기",
+            "오브젝트 디텍션",
+            "오프젝트 선택",
             "완료",
           ]}
         />
@@ -87,12 +117,12 @@ function ObjectRemoveScreen() {
         loop={false}
         index={currentPage}
         autoplay={false}
-        showsButtons
+        showsPagination={false}
         onIndexChanged={(page) => {
           setCurrentPage(page);
         }}
       >
-        {renderViewPage(0)}
+        {STEP.map((step) => renderViewPage(step))}
       </Swiper>
     </View>
   );
