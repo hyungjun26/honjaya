@@ -5,8 +5,9 @@ import Swiper from "react-native-swiper";
 
 import PhotoPick from "../components/PhotoPick";
 import ObjectDetect from "../components/ObjectDetect";
-import AdditionalImge from "../components/AdditionalImage";
+import AdditionalImge from "../components/ObjectSelect";
 import CompleteSave from "../components/CompleteSave";
+import ObjectSelect from "../components/ObjectSelect";
 
 const thirdIndicatorStyles = {
   stepIndicatorSize: 25,
@@ -56,13 +57,17 @@ function ObjectRemoveScreen({ navigation }) {
     } else if (data === 1) {
       return (
         <View key={data} style={styles.container}>
-          <ObjectDetect state={targetImg} />
+          <ObjectDetect
+            state={targetImg}
+            setCurrentPage={setCurrentPage}
+            currentPage={currentPage}
+          />
         </View>
       );
     } else if (data === 2) {
       return (
         <View key={data} style={styles.container}>
-          <AdditionalImge />
+          <ObjectSelect state={targetImg} />
         </View>
       );
     } else if (data === 3) {
@@ -101,8 +106,8 @@ function ObjectRemoveScreen({ navigation }) {
           currentPosition={currentPage}
           labels={[
             "사진\n가져오기",
-            "오브젝트 선택",
-            "추가이미지\n가져오기",
+            "오브젝트 디텍션",
+            "오프젝트 선택",
             "완료",
           ]}
         />

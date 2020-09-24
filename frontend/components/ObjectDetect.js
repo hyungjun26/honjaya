@@ -2,13 +2,16 @@ import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
-export default function ObjectDetect({ state }) {
+export default function ObjectDetect({ state, setCurrentPage, currentPage }) {
   return (
     <View style={styles.container}>
       <Image source={{ uri: state }} style={styles.logo} resizeMode="contain" />
       <Text style={styles.instructions}>오브젝트 디텍션을 실행해주세요.</Text>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => setCurrentPage(currentPage + 1)}
+        >
           <Icon style={{ fontSize: 25, color: "#999" }} name="target-account" />
           <Text style={styles.buttonText}>오브젝트 디텍션</Text>
         </TouchableOpacity>
