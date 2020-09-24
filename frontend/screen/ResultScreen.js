@@ -30,7 +30,7 @@ const thirdIndicatorStyles = {
 };
 const STEP = [0];
 
-function ResultScreen() {
+function ResultScreen( {navigation}){
   const [currentPage, setCurrentPage] = useState(3);
   const [targetImg, setTargetImg] = useState("../images/picture-plus.png");
 
@@ -43,7 +43,7 @@ function ResultScreen() {
     if (data === 3) {
       return (
         <View key={data} style={styles.container}>
-          <Result state={targetImg} setState={setTargetImg} />
+          <Result state={targetImg} setState={setTargetImg} navigation = {navigation} />
         </View>
       );
     }
