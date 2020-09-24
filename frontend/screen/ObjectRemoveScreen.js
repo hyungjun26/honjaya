@@ -33,9 +33,9 @@ const thirdIndicatorStyles = {
 };
 const STEP = [0, 1, 2, 3];
 
-function ObjectRemoveScreen() {
+function ObjectRemoveScreen({ navigation }) {
   const [currentPage, setCurrentPage] = useState(0);
-  const [targetImg, setTargetImg] = useState("");
+  const [targetImg, setTargetImg] = useState("/img/picture-plus.png");
 
   const onStepPress = (position) => {
     console.log(position);
@@ -46,7 +46,11 @@ function ObjectRemoveScreen() {
     if (data === 0) {
       return (
         <View key={data} style={styles.container}>
-          <PhotoPick state={targetImg} setState={setTargetImg} />
+          <PhotoPick
+            state={targetImg}
+            setState={setTargetImg}
+            navigation={navigation}
+          />
         </View>
       );
     } else if (data === 1) {
@@ -110,7 +114,6 @@ function ObjectRemoveScreen() {
         index={currentPage}
         autoplay={false}
         showsPagination={false}
-        showsButtons
         onIndexChanged={(page) => {
           setCurrentPage(page);
         }}

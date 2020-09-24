@@ -1,14 +1,18 @@
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 export default function ObjectDetect({ state }) {
   return (
     <View style={styles.container}>
       <Image source={{ uri: state }} style={styles.logo} resizeMode="contain" />
       <Text style={styles.instructions}>오브젝트 디텍션을 실행해주세요.</Text>
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>오브젝트 디텍션 실행</Text>
-      </TouchableOpacity>
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.button}>
+          <Icon style={{ fontSize: 25, color: "#999" }} name="target-account" />
+          <Text style={styles.buttonText}>오브젝트 디텍션</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -39,6 +43,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
+    flexDirection: "row",
     backgroundColor: "#fff",
     padding: 10,
     margin: 10,
