@@ -10,11 +10,13 @@ import AboutScreen from "./screen/AboutScreen";
 import GuideScreen from "./screen/GuideScreen";
 import ObjectRemoveScreen from "./screen/ObjectRemoveScreen";
 import CameraView from "./components/CameraView";
+import ResultScreen from "./screen/ResultScreen";
 
 const HomeStack = createStackNavigator();
 const AboutStack = createStackNavigator();
 const GuideStack = createStackNavigator();
 const RemoveStack = createStackNavigator();
+const ResultStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
 const HomeStackScreen = ({ navigation }) => (
@@ -139,6 +141,37 @@ const RemoveStackScreen = ({ navigation }) => (
       }}
     />
   </RemoveStack.Navigator>
+);
+
+const ResultStackScreen = ({ navigation }) => (
+  <ResultStack.Navigator
+    screenOptions={{
+      headerStyle: {
+        backgroundColor: "#01A9DB",
+      },
+      headerTintColor: "#fff",
+      headerTitleStyle: {
+        fontWeight: "bold",
+      },
+    }}
+  >
+    <ResultStack.Screen
+      name="Result"
+      component={ResultScreen}
+      options={{
+        headerLeft: () => (
+          <Icon.Button
+            name="menu"
+            size={25}
+            backgroundColor="#01A9DB"
+            onPress={() => {
+              navigation.openDrawer();
+            }}
+          />
+        ),
+      }}
+    />
+  </ResultStack.Navigator>
 );
 
 export default function App() {
