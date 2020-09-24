@@ -5,8 +5,7 @@ import Swiper from "react-native-swiper";
 
 import PhotoPick from "../components/PhotoPick";
 import ObjectDetect from "../components/ObjectDetect";
-import AdditionalImge from "../components/ObjectSelect";
-import CompleteSave from "../components/CompleteSave";
+import Result from "../components/Result";
 import ObjectSelect from "../components/ObjectSelect";
 
 const thirdIndicatorStyles = {
@@ -73,7 +72,7 @@ function ObjectRemoveScreen({ navigation }) {
     } else if (data === 3) {
       return (
         <View key={data} style={styles.container}>
-          <CompleteSave />
+          <Result navigation={navigation} />
         </View>
       );
     }
