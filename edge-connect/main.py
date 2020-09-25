@@ -7,6 +7,9 @@ import argparse
 from shutil import copyfile
 from src.config import Config
 from src.edge_connect import EdgeConnect
+from PIL import Image
+import os
+
 
 
 def main(mode=None):
@@ -15,6 +18,20 @@ def main(mode=None):
     Args:
         mode (int): 1: train, 2: test, 3: eval, reads from config file if not specified
     """
+    path = "./examples/places2/origin/"
+    file_list = os.listdir(path)
+    for file in file_list:
+        # origin imager
+        L_image = Image.open(path + str(file))
+        print(str(file), L_image)
+        out = L_image.convert("RGB")
+
+        # convert image
+        if(str(file).endswith('mask.png')):
+            out.save("./examples/places2/masks/" + str(file).replace('_mask', ''))
+        else:
+            out.save("./examples/places2/images/" + str(file))
+
 
     config = load_config(mode)
 
