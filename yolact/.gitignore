@@ -1,5 +1,3 @@
-examples/
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -22,7 +20,6 @@ lib64/
 parts/
 sdist/
 var/
-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -45,7 +42,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
-*.cover
+*,cover
 .hypothesis/
 
 # Translations
@@ -69,7 +66,7 @@ docs/_build/
 # PyBuilder
 target/
 
-# Jupyter Notebook
+# IPython Notebook
 .ipynb_checkpoints
 
 # pyenv
@@ -78,33 +75,91 @@ target/
 # celery beat schedule file
 celerybeat-schedule
 
-# SageMath parsed files
-*.sage.py
-
 # dotenv
 .env
 
 # virtualenv
-.venv
 venv/
 ENV/
 
 # Spyder project settings
 .spyderproject
-.spyproject
 
 # Rope project settings
 .ropeproject
 
-# mkdocs documentation
-/site
+# atom remote-sync package
+.remote-sync.json
 
-# mypy
-.mypy_cache/
-.vscode
+# weights
+weights/
 
-# custom
-.todo
-results
-checkpoints
-datasets
+#DS_Store
+.DS_Store
+
+# dev stuff
+eval/
+eval.ipynb
+dev.ipynb
+.vscode/
+
+# not ready
+videos/
+templates/
+data/ssd_dataloader.py
+data/datasets/
+doc/visualize.py
+read_results.py
+ssd300_120000/
+demos/live
+webdemo.py
+test_data_aug.py
+
+# attributes
+
+# pycharm
+.idea/
+
+# temp checkout soln
+data/coco
+data/sbd
+data/cityscapes
+
+# pylint
+.pylintrc
+
+# ssd.pytorch master branch (for merging)
+ssd.pytorch/
+
+# some datasets
+data/VOCdevkit/
+data/coco/images/
+data/coco/annotations/
+ap_data.pkl
+results/
+logs/
+scripts/aws/
+scripts/gt.npy
+scripts/proto.npy
+scripts/info.txt
+test.pkl
+testeval.py
+scripts/aws2/
+status.sh
+train.sh
+img/
+scripts/aws-ohio/
+scripts/aws3/
+data/config_dev.py
+data/coco/
+data/sbd/
+
+vid/
+vidres/
+
+_.py
+
+images/input/*
+!images/input/.gitkeep
+images/output/*
+!images/output/.gitkeep
