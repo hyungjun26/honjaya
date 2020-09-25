@@ -44,6 +44,10 @@ def parse_args(argv=None):
     parser.add_argument('--trained_model',
                         default='weights/ssd300_mAP_77.43_v2.pth', type=str,
                         help='Trained state_dict file path to open. If "interrupt", this will open the interrupt file.')
+    parser.add_argument('--skip',
+                        default='[]', type=str,
+                        help='남길 오브젝트,,')
+
     parser.add_argument('--top_k', default=5, type=int,
                         help='Further restrict the number of predictions to parse')
     parser.add_argument('--cuda', default=True, type=str2bool,
@@ -193,6 +197,23 @@ def prep_display(dets_out, img, h, w, path, undo_transform=True, class_color=Fal
         # After this, mask is of size [num_dets, h, w, 1]
         masks = masks[:num_dets_to_consider, :, :, None]
 
+        if args.skip != '[]':
+            skip = list(map(int, args.skip[1:-1].split(',')))
+            masks_copy = masks
+            boxes_copy = boxes
+            scores_copy = scores
+            adj = 1
+            for i in skip:
+                print('delete ' + str(i - adj))
+                masks_copy = torch.cat([masks_copy[0:i-adj], masks_copy[i:]])
+                boxes_copy = np.delete(boxes_copy, i-adj, 0)
+                scores_copy = np.delete(scores_copy, i-adj)
+                num_dets_to_consider -= 1
+                adj += 1
+            masks = masks_copy
+            boxes = boxes_copy
+            scores = scores_copy
+
         mask = masks.cpu().sum(0) >= 1
         mask = mask.numpy().astype("uint8")
         # mask = np.stack([mask, mask, mask], axis=2)
@@ -206,14 +227,16 @@ def prep_display(dets_out, img, h, w, path, undo_transform=True, class_color=Fal
                 file.write('\n')
             file.close()
 
-        
         write_mask(mask, path)
+        # white_mask = torch.Tensor(mask.astype(float)/255.0)
         mask = torch.Tensor(mask)
+        white_mask = (mask * 255).byte().cpu().numpy()
+        cv2.imwrite(path[:-4] + '_mask.png', white_mask)
+
         foreground = img_gpu.permute(2, 0, 1).unsqueeze(0).float()*255
         gauss = kornia.filters.GaussianBlur2d((9, 9), (8.5, 8.5))
         background = gauss((foreground).float())
 
-        # mask = mask.astype(float)/255.0
         # foreground2 = torch.mul(foreground.squeeze(0).permute(1,2,0).float(), mask)
         background2 = torch.mul(background.squeeze(0).permute(1,2,0).float(), 1-mask)
         # img_gpu = torch.add(torch.mul(img_gpu, mask), background2)
@@ -239,6 +262,7 @@ def prep_display(dets_out, img, h, w, path, undo_transform=True, class_color=Fal
 
         img_gpu = img_gpu * inv_alph_masks.prod(dim=0) + masks_color_summand
         foreground = img_gpu.permute(2, 0, 1).unsqueeze(0).float()*255
+        # object_mask = object_mask.permute(2, 0, 1).unsqueeze(0).float()*255
         fg2=  torch.mul(foreground.squeeze(0).permute(1,2,0).float(), mask)
 
         img_gpu = torch.add(fg2, background2)
@@ -647,6 +671,17 @@ def evalimage(net:Yolact, path:str, save_path:str=None):
         plt.show()
     else:
         cv2.imwrite(save_path, img_numpy)
+
+        background = cv2.imread(path).astype(float)
+        alpha = cv2.imread(save_path[:-4] + '_mask.png').astype(float)
+
+        background = cv2.multiply(1.0 - alpha, background)
+
+        outImage = cv2.add(alpha * 255 * 255, background)
+
+        cv2.imwrite((save_path + '2.png'), outImage)
+
+
 
 def evalimages(net:Yolact, input_folder:str, output_folder:str):
     if not os.path.exists(output_folder):
