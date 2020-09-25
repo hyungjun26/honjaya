@@ -6,14 +6,21 @@
 > 하지만 원치 않는 사람, 차와 같은 피사체가 함께 담긴 사진이 갤러리 속 하나는 존재할 것입니다.  
 > 이를 위한, AI 이미지 편집 모바일 서비스입니다.  
 
-## Requirements
-* [yolact
-](https://github.com/tristan3716/yolact)
 
 ## Setup
 ``` sh
-git clone --recursive https://lab.ssafy.com/s03-ai-sub2/s03p23a409.git
+git clone https://lab.ssafy.com/s03-ai-sub3/s03p23a409.git
+cd s03p23a409
+conda create env -f environment.yml
 ```
+
+Download the model and place it in the correct location.
+
+|path|link|
+|----|----|
+|yolact/weights/|[download](https://drive.google.com/drive/folders/1rE1KyIPEa_a8yszWXx7t9g3AbUdZFHjd)|
+|edge-connect/checkpoints/|[download](https://drive.google.com/drive/folders/1rE1KyIPEa_a8yszWXx7t9g3AbUdZFHjd)|
+
 
 ## Execute
 ### Image segmentation
@@ -22,5 +29,14 @@ cd yolact
 python eval.py --trained_model=weights/yolact_base_54_800000.pth --score_threshold=0.15 --top_k=15 --image=images/input/example.jpg:images/output/example.png
 ```
 
+### Object Remove
+``` sh
+cd edge-connect
+python test.py --checkpoints ./checkpoints/places2 --input ./examples/places2/images --mask ./examples/places2/masks --output ./checkpoints/results
+```
+
 ## Contribute
-[CONTRIBUTUING](./CONTRIBUTING.md)
+[Contribute Guide](./CONTRIBUTING.md)
+
+## License
+[MIT License](./LICENSE)
