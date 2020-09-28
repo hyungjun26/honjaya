@@ -18,13 +18,24 @@ def main(mode=None):
     Args:
         mode (int): 1: train, 2: test, 3: eval, reads from config file if not specified
     """
+    # image size change
     path = "./examples/places2/origin/"
     file_list = os.listdir(path)
     for file in file_list:
         # origin imager
+        if str(file) == '.DS_Store':
+            continue
         L_image = Image.open(path + str(file))
         print(str(file), L_image)
+        width = L_image.size[0] - L_image.size[0] % 4
+        height = L_image.size[1] - L_image.size[1] % 4
+
+        L_image = L_image.resize((width, height))
+
         out = L_image.convert("RGB")
+
+
+        print(L_image.size)
 
         # convert image
         if(str(file).endswith('mask.png')):
