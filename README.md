@@ -11,7 +11,7 @@
 ``` sh
 git clone https://lab.ssafy.com/s03-ai-sub3/s03p23a409.git
 cd s03p23a409
-conda create env -f environment.yml
+conda env create -f environment.yml
 ```
 
 Download the model and place it in the correct location.
