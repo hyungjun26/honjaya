@@ -124,6 +124,8 @@ test_data_aug.py
 data/coco
 data/sbd
 data/cityscapes
+data/datasets/
+data/ssd_dataloader.py
 
 # pylint
 .pylintrc
