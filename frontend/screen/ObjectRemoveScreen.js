@@ -35,7 +35,10 @@ const STEP = [0, 1, 2, 3];
 
 function ObjectRemoveScreen({ navigation }) {
   const [currentPage, setCurrentPage] = useState(0);
-  const [targetImg, setTargetImg] = useState("/img/picture-plus.png");
+  const [targetImg, setTargetImg] = useState({
+    uri:
+      "https://crestaproject.com/demo/lontano-pro/wp-content/themes/lontano-pro/images/no-image-slide.png",
+  });
 
   const onStepPress = (position) => {
     console.log(position);

@@ -14,14 +14,17 @@ export default function PhotoPick({ state, setState, navigation }) {
     }
 
     let pickerResult = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsMultipleSelection: true,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: false,
       allowsEditing: false,
       aspect: [4, 3],
       quality: 1,
     });
+    if (pickerResult.cancelled) {
+      return;
+    }
     console.log(pickerResult);
-    setState(pickerResult.uri);
+    setState(pickerResult);
   };
 
   const openCamera = async () => {
@@ -30,7 +33,11 @@ export default function PhotoPick({ state, setState, navigation }) {
 
   return (
     <View style={styles.container}>
-      <Image source={{ uri: state }} style={styles.logo} resizeMode="contain" />
+      <Image
+        source={{ uri: state.uri }}
+        style={styles.logo}
+        resizeMode="contain"
+      />
       <Text style={styles.instructions}>수정할 사진을 선택하세요.</Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={openImagePickerAsync} style={styles.button}>

@@ -12,7 +12,11 @@ function ObjectSelect({ state }) {
   });
   return (
     <View style={styles.container}>
-      <Image source={{ uri: state }} style={styles.logo} resizeMode="contain" />
+      <Image
+        source={{ uri: state.uri }}
+        style={styles.logo}
+        resizeMode="contain"
+      />
       <View style={styles.container}>
         <View style={styles.item}>
           <CheckBox

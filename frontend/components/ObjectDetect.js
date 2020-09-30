@@ -1,17 +1,45 @@
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import axios from "axios";
 
 export default function ObjectDetect({ state, setCurrentPage, currentPage }) {
+  const detectHandler = () => {
+    console.log(String(state.uri).length);
+    if (state.uri === "noimage") {
+      alert("이미지를 선택해주세요!!");
+      return;
+    }
+    const formData = new FormData();
+    let localUri = state.uri;
+    let filename = localUri.split("/").pop();
+    let match = /\.(\w+)$/.exec(filename);
+    let type = match ? `image/${match[1]}` : `image`;
+    formData.append("img", { uri: localUri, name: filename, type });
+    //console.log(formData);
+    axios({
+      method: "post",
+      url: "http://10.0.2.2:8000",
+      data: formData,
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+      .then(() => {
+        console.log("data success!");
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
   return (
     <View style={styles.container}>
-      <Image source={{ uri: state }} style={styles.logo} resizeMode="contain" />
+      <Image
+        source={{ uri: state.uri }}
+        style={styles.logo}
+        resizeMode="contain"
+      />
       <Text style={styles.instructions}>오브젝트 디텍션을 실행해주세요.</Text>
       <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => setCurrentPage(currentPage + 1)}
-        >
+        <TouchableOpacity style={styles.button} onPress={detectHandler}>
           <Icon style={{ fontSize: 25, color: "#999" }} name="target-account" />
           <Text style={styles.buttonText}>오브젝트 디텍션</Text>
         </TouchableOpacity>
