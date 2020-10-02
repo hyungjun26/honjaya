@@ -1,100 +1,57 @@
 import React, { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { CheckBox } from "native-base";
+import CheckBox from "./CoustomCheckBox.js";
 import Icon from "react-native-vector-icons/Feather";
 
+const initialState = [
+  {
+    no: 0,
+    name: "people1",
+    selected: false,
+    file: require("../dummy-image/mask1.png"),
+  },
+  {
+    no: 1,
+    name: "people2",
+    selected: false,
+    file: require("../dummy-image/mask2.png"),
+  },
+];
+
 function ObjectSelect({ state }) {
-  const [objectList, setObjectList] = useState({
-    selectedLang1: false,
-    selectedLang2: false,
-    selectedLang3: false,
-    selectedLang4: false,
-  });
+  const ORIGINAL = require("../dummy-image/original.jpg");
+  // const MASK1 = require("../dummy-image/mask1.png");
+  // const MASK2 = require("../dummy-image/mask2.png");
+  const [objectList, setObjectList] = useState(initialState);
+  const handleSelected = (idx) => {
+    objectList[idx].selected = !objectList[idx].selected;
+    setObjectList([...objectList]);
+  };
+  const renderCheckBox = (data) => {
+    return (
+      <CheckBox key={data.no} data={data} handleSelected={handleSelected} />
+    );
+  };
+  const renderMask = (data) => {
+    if (data.selected) {
+      return (
+        <Image
+          source={data.file}
+          style={styles.mask}
+          resizeMode="contain"
+          key={data.no}
+        />
+      );
+    }
+  };
   return (
     <View style={styles.container}>
-      <Image
-        source={{ uri: state.uri }}
-        style={styles.logo}
-        resizeMode="contain"
-      />
+      <Image source={ORIGINAL} style={styles.parent} resizeMode="contain" />
+      {objectList.map((data) => renderMask(data))}
+
       <View style={styles.container}>
         <View style={styles.item}>
-          <CheckBox
-            checked={objectList.selectedLang1}
-            color="#fc5185"
-            onPress={() =>
-              setObjectList({
-                ...objectList,
-                selectedLang1: !objectList.selectedLang1,
-              })
-            }
-          />
-          <Text
-            style={{
-              ...styles.checkBoxTxt,
-              color: objectList.selectedLang1 ? "#fc5185" : "gray",
-              fontWeight: objectList.selectedLang1 ? "bold" : "normal",
-            }}
-          >
-            People
-          </Text>
-          <CheckBox
-            checked={objectList.selectedLang2}
-            color="#fc5185"
-            onPress={() =>
-              setObjectList({
-                ...objectList,
-                selectedLang2: !objectList.selectedLang2,
-              })
-            }
-          />
-          <Text
-            style={{
-              ...styles.checkBoxTxt,
-              color: objectList.selectedLang2 ? "#fc5185" : "gray",
-              fontWeight: objectList.selectedLang2 ? "bold" : "normal",
-            }}
-          >
-            Bike
-          </Text>
-          <CheckBox
-            checked={objectList.selectedLang3}
-            color="#fc5185"
-            onPress={() =>
-              setObjectList({
-                ...objectList,
-                selectedLang3: !objectList.selectedLang3,
-              })
-            }
-          />
-          <Text
-            style={{
-              ...styles.checkBoxTxt,
-              color: objectList.selectedLang3 ? "#fc5185" : "gray",
-              fontWeight: objectList.selectedLang3 ? "bold" : "normal",
-            }}
-          >
-            Car
-          </Text>
-          <CheckBox
-            checked={objectList.selectedLang4}
-            color="#fc5185"
-            onPress={() =>
-              setObjectList({
-                ...objectList,
-                selectedLang4: !objectList.selectedLang4,
-              })
-            }
-          />
-          <Text
-            style={{
-              ...styles.checkBoxTxt,
-              color: objectList.selectedLang4 ? "#fc5185" : "gray",
-              fontWeight: objectList.selectedLang4 ? "bold" : "normal",
-            }}
-          >
-            Bird
-          </Text>
+          {objectList.map((data) => renderCheckBox(data))}
         </View>
         <TouchableOpacity style={styles.button}>
           <Icon style={{ fontSize: 25, color: "#999" }} name="loader" />
@@ -119,10 +76,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  logo: {
+  parent: {
     width: 400,
     height: 300,
     marginBottom: 20,
+    position: "relative",
+    opacity: 0.9,
+  },
+  mask: {
+    width: 400,
+    height: 300,
+    position: "absolute",
+    top: 0,
+    left: 5,
+    marginBottom: 20,
+    opacity: 0.75,
+    //backgroundColor: "rgba(255, 0, 0, 0.1)",
   },
   button: {
     flexDirection: "row",
