@@ -197,30 +197,63 @@ def prep_display(dets_out, img, h, w, path, undo_transform=True, class_color=Fal
         # After this, mask is of size [num_dets, h, w, 1]
         masks = masks[:num_dets_to_consider, :, :, None]
 
+        # specify class
+        adj = 0
+        for i in range(num_dets_to_consider):
+            adj_index = int(i) - int(adj)
+            class_name = cfg.dataset.class_names[classes[adj_index]]
+            if class_name not in ['person']:
+                masks = torch.cat([masks[0:adj_index], masks[adj_index+1:]])
+                boxes = np.delete(boxes, adj_index, 0)
+                scores = np.delete(scores, adj_index)
+                classes = np.delete(classes, adj_index)
+                adj += 1
+                num_dets_to_consider -= 1
+
+        # skip object
         if args.skip != '[]':
             skip = list(map(int, args.skip[1:-1].split(',')))
             masks_copy = masks
-            boxes_copy = boxes
-            scores_copy = scores
             adj = 1
             for i in skip:
                 print('delete ' + str(i - adj))
                 masks_copy = torch.cat([masks_copy[0:i-adj], masks_copy[i:]])
-                boxes_copy = np.delete(boxes_copy, i-adj, 0)
-                scores_copy = np.delete(scores_copy, i-adj)
+                boxes = np.delete(boxes, adj_index, 0)
+                scores = np.delete(scores, adj_index)
+                classes = np.delete(classes, adj_index)
                 num_dets_to_consider -= 1
                 adj += 1
             masks = masks_copy
-            boxes = boxes_copy
-            scores = scores_copy
 
-        mask = masks.cpu().sum(0) >= 1
+        v = masks.cpu().sum(0) >= 1
         mask = mask.numpy().astype("uint8")
         # mask = np.stack([mask, mask, mask], axis=2)
         # mask = torch.Tensor(mask).permute(0, 3, 1, 2)
 
+        # save mask each
+        for i in range(num_dets_to_consider):
+            current_mask = masks[i]
+            class_name = cfg.dataset.class_names[classes[i]]
+            current_mask = torch.Tensor(current_mask)
+            white_mask = (current_mask * 255).byte().cpu().numpy()
+            object_path = path[:-4] + '_' + class_name + '_' + str(i) + '.png'
+
+            # convert to transparency
+            cv2.imwrite(object_path, white_mask)
+            src = cv2.imread(object_path, 1)
+            tmp = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
+            _,alpha = cv2.threshold(tmp,0,255,cv2.THRESH_BINARY)
+            b, g, r = cv2.split(src)
+            rgba = [b, g, r, alpha]
+            dst = cv2.merge(rgba, 4)
+            cv2.imwrite(object_path, dst)
+
+        # save background
+        black_mask = (mask * 255).byte().cpu().numpy()
+        
+
         def write_mask(mask, path):
-            file = open(path + "_seg", 'w')
+            file = open(path[:-4] + ".raw", 'w')
             for i in mask:
                 for j in i:
                     file.write(str(j[0]))
@@ -228,7 +261,7 @@ def prep_display(dets_out, img, h, w, path, undo_transform=True, class_color=Fal
             file.close()
 
         write_mask(mask, path)
-        # white_mask = torch.Tensor(mask.astype(float)/255.0)
+        
         mask = torch.Tensor(mask)
         white_mask = (mask * 255).byte().cpu().numpy()
         cv2.imwrite(path[:-4] + '_mask.png', white_mask)
@@ -237,10 +270,7 @@ def prep_display(dets_out, img, h, w, path, undo_transform=True, class_color=Fal
         gauss = kornia.filters.GaussianBlur2d((9, 9), (8.5, 8.5))
         background = gauss((foreground).float())
 
-        # foreground2 = torch.mul(foreground.squeeze(0).permute(1,2,0).float(), mask)
         background2 = torch.mul(background.squeeze(0).permute(1,2,0).float(), 1-mask)
-        # img_gpu = torch.add(torch.mul(img_gpu, mask), background2)
-        # img_numpy = img_dist.byte().cpu().numpy()
 
 
         # Prepare the RGB images for each mask given their color (size [num_dets, h, w, 1])
