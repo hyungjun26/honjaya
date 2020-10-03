@@ -3,12 +3,11 @@ import os.path as osp
 import sys
 import torch
 import torch.utils.data as data
-import torch.nn.functional as F
+import torchvision.transforms as transforms
 import cv2
 import numpy as np
 from .config import cfg
 from pycocotools import mask as maskUtils
-import random
 
 def get_label_map():
     if cfg.dataset.label_map is None:
@@ -37,16 +36,14 @@ class COCOAnnotationTransform(object):
         for obj in target:
             if 'bbox' in obj:
                 bbox = obj['bbox']
-                label_idx = obj['category_id']
-                if label_idx >= 0:
-                    label_idx = self.label_map[label_idx] - 1
+                label_idx = self.label_map[obj['category_id']] - 1
                 final_box = list(np.array([bbox[0], bbox[1], bbox[0]+bbox[2], bbox[1]+bbox[3]])/scale)
                 final_box.append(label_idx)
                 res += [final_box]  # [xmin, ymin, xmax, ymax, label_idx]
             else:
                 print("No bbox found for object ", obj)
 
-        return res
+        return res  # [[xmin, ymin, xmax, ymax, label_idx], ... ]
 
 
 class COCODetection(data.Dataset):
@@ -62,14 +59,11 @@ class COCODetection(data.Dataset):
     """
 
     def __init__(self, image_path, info_file, transform=None,
-                 target_transform=None,
+                 target_transform=COCOAnnotationTransform(),
                  dataset_name='MS COCO', has_gt=True):
         # Do this here because we have too many things named COCO
         from pycocotools.coco import COCO
         
-        if target_transform is None:
-            target_transform = COCOAnnotationTransform()
-
         self.root = image_path
         self.coco = COCO(info_file)
         
@@ -78,7 +72,7 @@ class COCODetection(data.Dataset):
             self.ids = list(self.coco.imgs.keys())
         
         self.transform = transform
-        self.target_transform = COCOAnnotationTransform()
+        self.target_transform = target_transform
         
         self.name = dataset_name
         self.has_gt = has_gt
@@ -109,10 +103,11 @@ class COCODetection(data.Dataset):
         img_id = self.ids[index]
 
         if self.has_gt:
+            target = self.coco.imgToAnns[img_id]
             ann_ids = self.coco.getAnnIds(imgIds=img_id)
 
             # Target has {'segmentation', 'area', iscrowd', 'image_id', 'bbox', 'category_id'}
-            target = [x for x in self.coco.loadAnns(ann_ids) if x['image_id'] == img_id]
+            target = self.coco.loadAnns(ann_ids)
         else:
             target = []
 
@@ -122,9 +117,6 @@ class COCODetection(data.Dataset):
         crowd  = [x for x in target if     ('iscrowd' in x and x['iscrowd'])]
         target = [x for x in target if not ('iscrowd' in x and x['iscrowd'])]
         num_crowds = len(crowd)
-
-        for x in crowd:
-            x['category_id'] = -1
 
         # This is so we ensure that all crowd annotations are at the end of the array
         target += crowd
@@ -169,10 +161,6 @@ class COCODetection(data.Dataset):
                 masks = None
                 target = None
 
-        if target.shape[0] == 0:
-            print('Warning: Augmentation output an example with no ground truth. Resampling...')
-            return self.pull_item(random.randint(0, len(self.ids)-1))
-
         return torch.from_numpy(img).permute(2, 0, 1), target, masks, height, width, num_crowds
 
     def pull_image(self, index):
@@ -215,70 +203,3 @@ class COCODetection(data.Dataset):
         tmp = '    Target Transforms (if any): '
         fmt_str += '{0}{1}'.format(tmp, self.target_transform.__repr__().replace('\n', '\n' + ' ' * len(tmp)))
         return fmt_str
-
-def enforce_size(img, targets, masks, num_crowds, new_w, new_h):
-    """ Ensures that the image is the given size without distorting aspect ratio. """
-    with torch.no_grad():
-        _, h, w = img.size()
-
-        if h == new_h and w == new_w:
-            return img, targets, masks, num_crowds
-        
-        # Resize the image so that it fits within new_w, new_h
-        w_prime = new_w
-        h_prime = h * new_w / w
-
-        if h_prime > new_h:
-            w_prime *= new_h / h_prime
-            h_prime = new_h
-
-        w_prime = int(w_prime)
-        h_prime = int(h_prime)
-
-        # Do all the resizing
-        img = F.interpolate(img.unsqueeze(0), (h_prime, w_prime), mode='bilinear', align_corners=False)
-        img.squeeze_(0)
-
-        # Act like each object is a color channel
-        masks = F.interpolate(masks.unsqueeze(0), (h_prime, w_prime), mode='bilinear', align_corners=False)
-        masks.squeeze_(0)
-
-        # Scale bounding boxes (this will put them in the top left corner in the case of padding)
-        targets[:, [0, 2]] *= (w_prime / new_w)
-        targets[:, [1, 3]] *= (h_prime / new_h)
-
-        # Finally, pad everything to be the new_w, new_h
-        pad_dims = (0, new_w - w_prime, 0, new_h - h_prime)
-        img   = F.pad(  img, pad_dims, mode='constant', value=0)
-        masks = F.pad(masks, pad_dims, mode='constant', value=0)
-
-        return img, targets, masks, num_crowds
-        
-
-
-
-def detection_collate(batch):
-    """Custom collate fn for dealing with batches of images that have a different
-    number of associated object annotations (bounding boxes).
-
-    Arguments:
-        batch: (tuple) A tuple of tensor images and (lists of annotations, masks)
-
-    Return:
-        A tuple containing:
-            1) (tensor) batch of images stacked on their 0 dim
-            2) (list<tensor>, list<tensor>, list<int>) annotations for a given image are stacked
-                on 0 dim. The output gt is a tuple of annotations and masks.
-    """
-    targets = []
-    imgs = []
-    masks = []
-    num_crowds = []
-
-    for sample in batch:
-        imgs.append(sample[0])
-        targets.append(torch.FloatTensor(sample[1][0]))
-        masks.append(torch.FloatTensor(sample[1][1]))
-        num_crowds.append(sample[1][2])
-
-    return imgs, (targets, masks, num_crowds)
