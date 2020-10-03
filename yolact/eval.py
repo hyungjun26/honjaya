@@ -194,50 +194,89 @@ def prep_display(dets_out, img, h, w, path, undo_transform=True, class_color=Fal
         masks = masks[:num_dets_to_consider, :, :, None]
         # pdb.set_trace()
 
+        # specify class
+        adj = 0
+        for i in range(num_dets_to_consider):
+            adj_index = int(i) - int(adj)
+            class_name = cfg.dataset.class_names[classes[adj_index]]
+            if class_name not in ['person']:
+                masks = torch.cat([masks[0:adj_index], masks[adj_index+1:]])
+                boxes = np.delete(boxes, adj_index, 0)
+                scores = np.delete(scores, adj_index)
+                classes = np.delete(classes, adj_index)
+                adj += 1
+                num_dets_to_consider -= 1
+
+        # skip object
         if args.skip != '[]':
             skip = list(map(int, args.skip[1:-1].split(',')))
             masks_copy = masks
-            boxes_copy = boxes
-            scores_copy = scores
             adj = 1
             for i in skip:
-                print('delete ' + str(i - adj))
                 masks_copy = torch.cat([masks_copy[0:i-adj], masks_copy[i:]])
-                boxes_copy = np.delete(boxes_copy, i-adj, 0)
-                scores_copy = np.delete(scores_copy, i-adj)
+                boxes = np.delete(boxes, adj_index, 0)
+                scores = np.delete(scores, adj_index)
+                classes = np.delete(classes, adj_index)
                 num_dets_to_consider -= 1
                 adj += 1
             masks = masks_copy
-            boxes = boxes_copy
-            scores = scores_copy
 
+        # convere mask to uinit8
         mask = masks.cpu().sum(0) >= 1
         mask = mask.numpy().astype("uint8")
-        # mask = np.stack([mask, mask, mask], axis=2)
-        # mask = torch.Tensor(mask).permute(0, 3, 1, 2)
 
-        def write_mask(mask, path):
-            file = open(path + "_seg", 'w')
-            for i in mask:
-                for j in i:
-                    file.write(str(j[0]))
-                file.write('\n')
-            file.close()
+        # save mask each
+        for i in range(num_dets_to_consider):
+            current_mask = masks[i]
+            class_name = cfg.dataset.class_names[classes[i]]
+            current_mask = torch.Tensor(current_mask)
+            white_mask = (current_mask * 255).byte().cpu().numpy()
+            object_path = path[:-4] + '_' + class_name + '_' + str(i) + '.png'
 
-        write_mask(mask, path)
+            # convert to transparency
+            cv2.imwrite(object_path, white_mask)
+            src = cv2.imread(object_path, 1)
+            tmp = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
+            _,alpha = cv2.threshold(tmp,0,255,cv2.THRESH_BINARY)
+            b, g, r = cv2.split(src)
+            rgba = [b, g, r, alpha]
+            dst = cv2.merge(rgba, 4)
+            cv2.imwrite(object_path, dst)
+
+        # save background
+        # black_mask = (mask * 255).byte().cpu().numpy()
+
+        # save mask to raw format
+        # def write_mask(mask, path):
+        #     file = open(path[:-4] + ".raw", 'w')
+        #     for i in mask:
+        #         for j in i:
+        #             file.write(str(j[0]))
+        #         file.write('\n')
+        #     file.close()
+
+        # write_mask(mask, path)
+
+        # save black-white mask
         mask = torch.Tensor(mask)
         white_mask = (mask * 255).byte().cpu().numpy()
-        cv2.imwrite(path[:-4] + '_mask.png', white_mask)
+        mask_path = path[:-4] + '_black_white.png'
+        cv2.imwrite(mask_path, white_mask)
+
+        # save black-transparency mask
+        mask_image = cv2.imread(mask_path)
+        h, w, c = mask_image.shape
+        image_bgra = np.concatenate([mask_image, np.full((h, w, 1), 255, dtype=np.uint8)], axis=-1)
+        white = np.all(mask_image == [255, 255, 255], axis=-1)
+        image_bgra[white, -1] = 0
+
+        cv2.imwrite(path[:-4] + '_black_transparency.png', image_bgra)
 
         foreground = img_gpu.permute(2, 0, 1).unsqueeze(0).float()*255
         gauss = kornia.filters.GaussianBlur2d((9, 9), (8.5, 8.5))
         background = gauss((foreground).float())
 
-        # mask = mask.astype(float)/255.0
-        # foreground2 = torch.mul(foreground.squeeze(0).permute(1,2,0).float(), mask)
         background2 = torch.mul(background.squeeze(0).permute(1,2,0).float(), 1-mask)
-        # img_gpu = torch.add(torch.mul(img_gpu, mask), background2)
-        # img_numpy = img_dist.byte().cpu().numpy()
 
         # Prepare the RGB images for each mask given their color (size [num_dets, h, w, 1])
         # colors = torch.cat([get_color(j, on_gpu=img.device.index).view(1, 1, 1, 3) for j in range(num_dets_to_consider)], dim=0)
@@ -259,8 +298,8 @@ def prep_display(dets_out, img, h, w, path, undo_transform=True, class_color=Fal
 
         img_gpu = img_gpu * inv_alph_masks.prod(dim=0) + masks_color_summand
 
-        foreground = img_gpu.permute(2, 0, 1).unsqueeze(0).float()*255
-        fg2=  torch.mul(foreground.squeeze(0).permute(1,2,0).float(), mask)
+        foreground = img_gpu.permute(2, 0, 1).unsqueeze(0).float() * 255
+        fg2 =  torch.mul(foreground.squeeze(0).permute(1, 2, 0).float(), mask)
 
         img_gpu = torch.add(fg2, background2)
         
@@ -643,15 +682,15 @@ def evalimage(net:Yolact, path:str, save_path:str=None):
         plt.title(path)
         plt.show()
     else:
-        cv2.imwrite(save_path, img_numpy)
+        # cv2.imwrite(save_path, img_numpy)
         background = cv2.imread(path).astype(float)
-        alpha = cv2.imread(save_path[:-4] + '_mask.png').astype(float)
+        alpha = cv2.imread(save_path[:-4] + '_black_white.png').astype(float)
 
         background = cv2.multiply(1.0 - alpha, background)
 
         outImage = cv2.add(alpha * 255 * 255, background)
 
-        cv2.imwrite((save_path + '2.png'), outImage)
+        cv2.imwrite((save_path[:-4] + '_white.png'), outImage)
 
 
 
