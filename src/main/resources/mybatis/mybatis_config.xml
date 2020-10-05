@@ -8,9 +8,10 @@
 		<setting name="jdbcTypeForNull" value="NULL" />
 	</settings>
 	<typeAliases>
+	<typeAlias type="com.example.demo.dto.ImageuploadDto" alias ="image"/>
 	
 	</typeAliases>
 	<mappers>
-		
+		<mapper resource="mybatis/mapper/Image.xml"/>
 	</mappers>
 </configuration>
