@@ -48,24 +48,27 @@ function ObjectSelect({ state, maskList, setMaskList, imageKey }) {
   };
 
   const handleRemove = () => {
-    const list = [],
+    const list = [];
     for (let idx = 0; idx < maskList.length; idx++) {
-      if(maskList[idx].selected){
+      if (maskList[idx].selected) {
         list.push(maskList[idx].id);
-      }      
-    }
-    axios({
-      method:"post",
-      url:"http://10.0.2.2:8000/select",
-      data:{
-        key:imageKey,
-        check:list,
       }
-    }).then(()=>{
-      console.log("checklist transfer success");
-    }).catch((e)=>{
-      console.log(e);
+    }
+
+    axios({
+      method: "post",
+      url: "http://10.0.2.2:8000/select",
+      data: {
+        key: imageKey,
+        check: list,
+      },
     })
+      .then(() => {
+        console.log("checklist transfer success");
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
   return (
     <View style={styles.container}>
