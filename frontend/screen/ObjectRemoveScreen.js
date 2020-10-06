@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import StepIndicator from "react-native-step-indicator";
 import Swiper from "react-native-swiper";
@@ -35,11 +35,13 @@ const STEP = [0, 1, 2, 3];
 
 function ObjectRemoveScreen({ navigation }) {
   const [currentPage, setCurrentPage] = useState(0);
+  const [maskList, setMaskList] = useState(null);
+  const [imageKey, setImageKey] = useState(null);
   const [targetImg, setTargetImg] = useState({
     uri:
       "https://crestaproject.com/demo/lontano-pro/wp-content/themes/lontano-pro/images/no-image-slide.png",
   });
-
+  const swiper = useRef(null);
   const onStepPress = (position) => {
     console.log(position);
     setCurrentPage(position);
@@ -53,6 +55,7 @@ function ObjectRemoveScreen({ navigation }) {
             state={targetImg}
             setState={setTargetImg}
             navigation={navigation}
+            onPressNext={onPressNext}
           />
         </View>
       );
@@ -61,15 +64,22 @@ function ObjectRemoveScreen({ navigation }) {
         <View key={data} style={styles.container}>
           <ObjectDetect
             state={targetImg}
-            setCurrentPage={setCurrentPage}
-            currentPage={currentPage}
+            onPressNext={onPressNext}
+            setMaskList={setMaskList}
+            setImageKey={setImageKey}
           />
         </View>
       );
     } else if (data === 2) {
       return (
         <View key={data} style={styles.container}>
-          <ObjectSelect state={targetImg} />
+          <ObjectSelect
+            state={targetImg}
+            onPressNext={onPressNext}
+            maskList={maskList}
+            imageKey={imageKey}
+            setMaskList={setMaskList}
+          />
         </View>
       );
     } else if (data === 3) {
@@ -99,6 +109,10 @@ function ObjectRemoveScreen({ navigation }) {
     );
   };
 
+  const onPressNext = () => {
+    swiper.current.scrollBy(1);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.stepIndicator}>
@@ -116,11 +130,13 @@ function ObjectRemoveScreen({ navigation }) {
       </View>
 
       <Swiper
+        ref={swiper}
         style={{ flexGrow: 1 }}
         loop={false}
         index={currentPage}
         autoplay={false}
         showsPagination={false}
+        scrollEnabled={false}
         onIndexChanged={(page) => {
           setCurrentPage(page);
         }}

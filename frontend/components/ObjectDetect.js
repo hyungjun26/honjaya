@@ -3,7 +3,12 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import axios from "axios";
 
-export default function ObjectDetect({ state, setCurrentPage, currentPage }) {
+export default function ObjectDetect({
+  state,
+  onPressNext,
+  setMaskList,
+  setImageKey,
+}) {
   const detectHandler = () => {
     console.log(String(state.uri).length);
     if (state.uri === "noimage") {
@@ -11,6 +16,7 @@ export default function ObjectDetect({ state, setCurrentPage, currentPage }) {
       return;
     }
     const formData = new FormData();
+    let key = null;
     let localUri = state.uri;
     let filename = localUri.split("/").pop();
     let match = /\.(\w+)$/.exec(filename);
@@ -23,12 +29,27 @@ export default function ObjectDetect({ state, setCurrentPage, currentPage }) {
       data: formData,
       headers: { "Content-Type": "multipart/form-data" },
     })
-      .then(() => {
-        console.log("data success!");
+      .then((res) => {
+        console.log(res);
+        setImageKey(res.data.key);
+        const temp = [];
+        const array = res.data.objects;
+        for (let idx = 0; idx < array.length; idx++) {
+          const element = array[idx];
+          temp.push({
+            id: element.id,
+            type: element.type,
+            selected: false,
+            file: `data:image/png;base64,${array[idx].image}`,
+          });
+        }
+        setMaskList(temp);
       })
       .catch((e) => {
         console.log(e);
       });
+
+    onPressNext();
   };
   return (
     <View style={styles.container}>

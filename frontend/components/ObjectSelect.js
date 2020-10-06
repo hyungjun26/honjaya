@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import CheckBox from "./CoustomCheckBox.js";
 import Icon from "react-native-vector-icons/Feather";
+import axios from "axios";
 
 const initialState = [
   {
@@ -18,18 +19,19 @@ const initialState = [
   },
 ];
 
-function ObjectSelect({ state }) {
-  const ORIGINAL = require("../dummy-image/original.jpg");
+function ObjectSelect({ state, maskList, setMaskList, imageKey }) {
+  // const ORIGINAL = require("../dummy-image/original.jpg");
   // const MASK1 = require("../dummy-image/mask1.png");
   // const MASK2 = require("../dummy-image/mask2.png");
-  const [objectList, setObjectList] = useState(initialState);
+  // const BACKMASK = require("../dummy-image/backgroundcolor_black.png");
+  // const [objectList, setObjectList] = useState(initialState);
   const handleSelected = (idx) => {
-    objectList[idx].selected = !objectList[idx].selected;
-    setObjectList([...objectList]);
+    maskList[idx].selected = !maskList[idx].selected;
+    setMaskList([...maskList]);
   };
   const renderCheckBox = (data) => {
     return (
-      <CheckBox key={data.no} data={data} handleSelected={handleSelected} />
+      <CheckBox key={data.id} data={data} handleSelected={handleSelected} />
     );
   };
   const renderMask = (data) => {
@@ -39,21 +41,47 @@ function ObjectSelect({ state }) {
           source={data.file}
           style={styles.mask}
           resizeMode="contain"
-          key={data.no}
+          key={data.id}
         />
       );
     }
   };
+
+  const handleRemove = () => {
+    const list = [],
+    for (let idx = 0; idx < maskList.length; idx++) {
+      if(maskList[idx].selected){
+        list.push(maskList[idx].id);
+      }      
+    }
+    axios({
+      method:"post",
+      url:"http://10.0.2.2:8000/select",
+      data:{
+        key:imageKey,
+        check:list,
+      }
+    }).then(()=>{
+      console.log("checklist transfer success");
+    }).catch((e)=>{
+      console.log(e);
+    })
+  };
   return (
     <View style={styles.container}>
-      <Image source={ORIGINAL} style={styles.parent} resizeMode="contain" />
-      {objectList.map((data) => renderMask(data))}
+      <Image
+        source={{ uri: state.uri }}
+        style={styles.parent}
+        resizeMode="contain"
+      />
+      {/* <Image source={BACKMASK} style={styles.mask} resizeMode="contain" /> */}
+      {maskList.map((data) => renderMask(data))}
 
       <View style={styles.container}>
         <View style={styles.item}>
-          {objectList.map((data) => renderCheckBox(data))}
+          {maskList.map((data) => renderCheckBox(data))}
         </View>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleRemove}>
           <Icon style={{ fontSize: 25, color: "#999" }} name="loader" />
           <Text style={styles.buttonText}>오브젝트 제거하기</Text>
         </TouchableOpacity>

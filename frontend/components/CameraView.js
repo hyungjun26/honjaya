@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
   View,
@@ -12,6 +12,21 @@ import Icon from "react-native-vector-icons/Feather";
 function CameraView({ navigation }) {
   const [hasPermission, setHasPermission] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
+
+  const cam = useRef().current;
+
+  const _takePicture = async () => {
+    const option = { quality: 0.5, base64: true, skipProcessing: false };
+    try {
+      const picture = await cam.takePictureAsync(option);
+
+      if (picture.source) {
+        console.log(picture.source);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -27,7 +42,7 @@ function CameraView({ navigation }) {
     return <Text>No access to camera</Text>;
   }
   return (
-    <Camera style={styles.camera} type={type}>
+    <Camera ref={cam} style={styles.camera} type={type}>
       <SafeAreaView></SafeAreaView>
       <SafeAreaView style={{ padding: 30 }}>
         <View style={styles.footer}>
@@ -38,7 +53,7 @@ function CameraView({ navigation }) {
               onPress={() => navigation.goBack()}
             />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={_takePicture}>
             <View style={styles.snapButton}>
               <Icon color="#fff" style={styles.innerSnapButton} />
             </View>

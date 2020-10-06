@@ -1,10 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import Camera from "./CameraView";
+import DefualtLoading from "./DefualtLoading";
 
-export default function PhotoPick({ state, setState, navigation }) {
+export default function PhotoPick({
+  state,
+  setState,
+  navigation,
+  onPressNext,
+}) {
+  const [loading, setLoading] = useState(false);
+
   let openImagePickerAsync = async () => {
     let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
 
@@ -24,7 +31,14 @@ export default function PhotoPick({ state, setState, navigation }) {
       return;
     }
     console.log(pickerResult);
-    setState(pickerResult);
+
+    setLoading(true);
+
+    setTimeout(function () {
+      setLoading(false);
+      setState(pickerResult);
+      onPressNext();
+    }, 1000);
   };
 
   const openCamera = async () => {
@@ -33,6 +47,7 @@ export default function PhotoPick({ state, setState, navigation }) {
 
   return (
     <View style={styles.container}>
+      <DefualtLoading state={loading} />
       <Image
         source={{ uri: state.uri }}
         style={styles.logo}
