@@ -225,7 +225,7 @@ def prep_display(dets_out, img, h, w, path, undo_transform=True, class_color=Fal
                 adj += 1
             masks = masks_copy
 
-        v = masks.cpu().sum(0) >= 1
+        mask = masks.cpu().sum(0) >= 1
         mask = mask.numpy().astype("uint8")
         # mask = np.stack([mask, mask, mask], axis=2)
         # mask = torch.Tensor(mask).permute(0, 3, 1, 2)
@@ -249,23 +249,32 @@ def prep_display(dets_out, img, h, w, path, undo_transform=True, class_color=Fal
             cv2.imwrite(object_path, dst)
 
         # save background
-        black_mask = (mask * 255).byte().cpu().numpy()
+        # black_mask = (mask * 255).byte().cpu().numpy()
         
 
-        def write_mask(mask, path):
-            file = open(path[:-4] + ".raw", 'w')
-            for i in mask:
-                for j in i:
-                    file.write(str(j[0]))
-                file.write('\n')
-            file.close()
+        # def write_mask(mask, path):
+        #     file = open(path[:-4] + ".raw", 'w')
+        #     for i in mask:
+        #         for j in i:
+        #             file.write(str(j[0]))
+        #         file.write('\n')
+        #     file.close()
 
-        write_mask(mask, path)
-        
+        # save black & white mask
         mask = torch.Tensor(mask)
         white_mask = (mask * 255).byte().cpu().numpy()
-        cv2.imwrite(path[:-4] + '_mask.png', white_mask)
+        mask_path = path[:-4] + '_mask.png'
+        cv2.imwrite(mask_path, white_mask)
 
+        # save transparency background
+        mask_image = cv2.imread(mask_path)
+        h, w, c = mask_image.shape
+        image_bgra = np.concatenate([mask_image, np.full((h, w, 1), 255, dtype=np.uint8)], axis=-1)
+        white = np.all(mask_image == [255, 255, 255], axis=-1)
+        image_bgra[white, -1] = 0
+        cv2.imwrite(path[:-4] + '_background.png', image_bgra)
+
+        # 안쓰는거....
         foreground = img_gpu.permute(2, 0, 1).unsqueeze(0).float()*255
         gauss = kornia.filters.GaussianBlur2d((9, 9), (8.5, 8.5))
         background = gauss((foreground).float())
@@ -700,7 +709,7 @@ def evalimage(net:Yolact, path:str, save_path:str=None):
         plt.title(path)
         plt.show()
     else:
-        cv2.imwrite(save_path, img_numpy)
+        # cv2.imwrite(save_path, img_numpy)
 
         background = cv2.imread(path).astype(float)
         alpha = cv2.imread(save_path[:-4] + '_mask.png').astype(float)
@@ -709,7 +718,7 @@ def evalimage(net:Yolact, path:str, save_path:str=None):
 
         outImage = cv2.add(alpha * 255 * 255, background)
 
-        cv2.imwrite((save_path + '2.png'), outImage)
+        cv2.imwrite(save_path, outImage)
 
 
 
