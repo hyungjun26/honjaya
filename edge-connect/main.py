@@ -19,7 +19,7 @@ def main(mode=None):
         mode (int): 1: train, 2: test, 3: eval, reads from config file if not specified
     """
     # image size change
-    path = "./examples/places2/origin/"
+    path = "C://Users//multicampus//s03p23a409//edge-connect//examples//places2//origin//"
     file_list = os.listdir(path)
     for file in file_list:
         # origin imager
@@ -39,9 +39,9 @@ def main(mode=None):
 
         # convert image
         if(str(file).endswith('mask.png')):
-            out.save("./examples/places2/masks/" + str(file).replace('_mask', ''))
+            out.save("C://Users//multicampus//s03p23a409//edge-connect//examples//places2//masks//" + str(file).replace('_mask', ''))
         else:
-            out.save("./examples/places2/images/" + str(file))
+            out.save("C://Users//multicampus//s03p23a409//edge-connect//examples//places2//images//" + str(file))
 
 
     config = load_config(mode)
