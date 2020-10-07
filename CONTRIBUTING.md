@@ -6,14 +6,18 @@
 + release: master branch
 + develop: develop branch (default)
 + feature: feature/{TASK_SCOPE}/{TASK_NAME} branch
-    - {TASK_SCOPE} refers to a category of applications, and the following are examples of possible patterns:
-        * ai
-        * api
-        * web
-        * app
-    - {TASK_NAME} means a function that you implement and must match `/[a-z-]/` pattern.
-    - e.g. feature/ai/image-segmentation
-    - e.g. feature/web/login
+    - {TASK_SCOPE} refers to a category of applications:
+        - must match `/[a-z]/` pattern
+        - the following are examples of possible patterns:
+            * ai
+            * api
+            * web
+            * app
+    - {TASK_NAME} means a function that you implement
+        - must match `/[a-z-]/` pattern.
+    - examples:
+        - feature/ai/image-segmentation
+        - feature/web/login
 
 ## Commit
 - Write a message that **clearly identifies what you did**.

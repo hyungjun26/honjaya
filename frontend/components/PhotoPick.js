@@ -1,10 +1,25 @@
-import React from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import Camera from "./CameraView";
+import DefualtLoading from "./DefualtLoading";
+import * as FileSystem from "expo-file-system";
 
-export default function PhotoPick({ state, setState, navigation }) {
+export default function PhotoPick({
+  state,
+  setState,
+  navigation,
+  onPressNext,
+}) {
+  const [loading, setLoading] = useState(false);
+
   let openImagePickerAsync = async () => {
     let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
 
@@ -14,14 +29,38 @@ export default function PhotoPick({ state, setState, navigation }) {
     }
 
     let pickerResult = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsMultipleSelection: true,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: false,
       allowsEditing: false,
       aspect: [4, 3],
       quality: 1,
     });
+    if (pickerResult.cancelled) {
+      return;
+    }
     console.log(pickerResult);
-    setState(pickerResult.uri);
+    const uri = pickerResult.uri;
+    const info = await FileSystem.getInfoAsync(uri);
+    console.log(info);
+    if (info.size > 1500000) {
+      Alert.alert(
+        "사진 크기 제한!",
+        "크기가 1.5mb 이하인 사진을 선택해주세요.",
+        [
+          {
+            text: "ok",
+          },
+        ]
+      );
+      return;
+    }
+    setLoading(true);
+
+    setTimeout(function () {
+      setLoading(false);
+      setState(pickerResult);
+      onPressNext();
+    }, 500);
   };
 
   const openCamera = async () => {
@@ -30,7 +69,12 @@ export default function PhotoPick({ state, setState, navigation }) {
 
   return (
     <View style={styles.container}>
-      <Image source={{ uri: state }} style={styles.logo} resizeMode="contain" />
+      <DefualtLoading state={loading} />
+      <Image
+        source={{ uri: state.uri }}
+        style={styles.logo}
+        resizeMode="contain"
+      />
       <Text style={styles.instructions}>수정할 사진을 선택하세요.</Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={openImagePickerAsync} style={styles.button}>
