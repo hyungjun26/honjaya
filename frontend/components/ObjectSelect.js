@@ -37,8 +37,6 @@ function ObjectSelect({
 }) {
   const [loading, setLoading] = useState(false);
   const handleSelected = (idx) => {
-    //console.log(maskList);
-    //console.log(idx);
     maskList[idx].selected = !maskList[idx].selected;
     setMaskList([...maskList]);
   };
@@ -71,20 +69,20 @@ function ObjectSelect({
 
     axios({
       method: "post",
-      url: "http://1.233.63.235:8000/select",
+      url: "http://j3a409.p.ssafy.io/api/select",
       data: {
         key: imageKey,
         check: list,
       },
     })
       .then((res) => {
-        console.log("checklist transfer success");
         const resultImage = `data:image/png;base64,${res.data.objects[0].image}`;
         setResultImg(resultImage);
         setLoading(false);
         onPressNext();
       })
       .catch((e) => {
+        console.log(e);
         setLoading(false);
         alert("오류가 발생했습니다.");
       });
