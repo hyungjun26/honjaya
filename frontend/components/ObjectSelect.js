@@ -1,103 +1,118 @@
 import React, { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { CheckBox } from "native-base";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import CheckBox from "./CoustomCheckBox.js";
 import Icon from "react-native-vector-icons/Feather";
+import axios from "axios";
+import DefualtLoading from "./DefualtLoading";
 
-function ObjectSelect({ state }) {
-  const [objectList, setObjectList] = useState({
-    selectedLang1: false,
-    selectedLang2: false,
-    selectedLang3: false,
-    selectedLang4: false,
-  });
+const initialState = [
+  {
+    id: 0,
+    type: "people1",
+    selected: false,
+    file: require("../dummy-image/mask1.png"),
+  },
+  {
+    id: 1,
+    type: "people2",
+    selected: false,
+    file: require("../dummy-image/mask2.png"),
+  },
+];
+
+function ObjectSelect({
+  state,
+  maskList,
+  setMaskList,
+  imageKey,
+  setResultImg,
+  onPressNext,
+}) {
+  const [loading, setLoading] = useState(false);
+  const handleSelected = (idx) => {
+    //console.log(maskList);
+    //console.log(idx);
+    maskList[idx].selected = !maskList[idx].selected;
+    setMaskList([...maskList]);
+  };
+  const renderCheckBox = (data) => {
+    return (
+      <CheckBox key={data.id} data={data} handleSelected={handleSelected} />
+    );
+  };
+  const renderMask = (data) => {
+    if (data.selected) {
+      return (
+        <Image
+          source={{ uri: data.file }}
+          style={styles.mask}
+          resizeMode="contain"
+          key={data.id}
+        />
+      );
+    }
+  };
+
+  const handleRemove = () => {
+    setLoading(true);
+    const list = [];
+    for (let idx = 0; idx < maskList.length; idx++) {
+      if (maskList[idx].selected) {
+        list.push(maskList[idx].id);
+      }
+    }
+
+    axios({
+      method: "post",
+      url: "http://1.233.63.235:8000/select",
+      data: {
+        key: imageKey,
+        check: list,
+      },
+    })
+      .then((res) => {
+        console.log("checklist transfer success");
+        const resultImage = `data:image/png;base64,${res.data.objects[0].image}`;
+        setResultImg(resultImage);
+        setLoading(false);
+        onPressNext();
+      })
+      .catch((e) => {
+        setLoading(false);
+        alert("오류가 발생했습니다.");
+      });
+  };
   return (
-    <View style={styles.container}>
-      <Image source={{ uri: state }} style={styles.logo} resizeMode="contain" />
+    <ScrollView>
       <View style={styles.container}>
-        <View style={styles.item}>
-          <CheckBox
-            checked={objectList.selectedLang1}
-            color="#fc5185"
-            onPress={() =>
-              setObjectList({
-                ...objectList,
-                selectedLang1: !objectList.selectedLang1,
-              })
-            }
-          />
-          <Text
-            style={{
-              ...styles.checkBoxTxt,
-              color: objectList.selectedLang1 ? "#fc5185" : "gray",
-              fontWeight: objectList.selectedLang1 ? "bold" : "normal",
-            }}
-          >
-            People
-          </Text>
-          <CheckBox
-            checked={objectList.selectedLang2}
-            color="#fc5185"
-            onPress={() =>
-              setObjectList({
-                ...objectList,
-                selectedLang2: !objectList.selectedLang2,
-              })
-            }
-          />
-          <Text
-            style={{
-              ...styles.checkBoxTxt,
-              color: objectList.selectedLang2 ? "#fc5185" : "gray",
-              fontWeight: objectList.selectedLang2 ? "bold" : "normal",
-            }}
-          >
-            Bike
-          </Text>
-          <CheckBox
-            checked={objectList.selectedLang3}
-            color="#fc5185"
-            onPress={() =>
-              setObjectList({
-                ...objectList,
-                selectedLang3: !objectList.selectedLang3,
-              })
-            }
-          />
-          <Text
-            style={{
-              ...styles.checkBoxTxt,
-              color: objectList.selectedLang3 ? "#fc5185" : "gray",
-              fontWeight: objectList.selectedLang3 ? "bold" : "normal",
-            }}
-          >
-            Car
-          </Text>
-          <CheckBox
-            checked={objectList.selectedLang4}
-            color="#fc5185"
-            onPress={() =>
-              setObjectList({
-                ...objectList,
-                selectedLang4: !objectList.selectedLang4,
-              })
-            }
-          />
-          <Text
-            style={{
-              ...styles.checkBoxTxt,
-              color: objectList.selectedLang4 ? "#fc5185" : "gray",
-              fontWeight: objectList.selectedLang4 ? "bold" : "normal",
-            }}
-          >
-            Bird
-          </Text>
+        <DefualtLoading state={loading} />
+        <Image
+          source={{ uri: state.uri }}
+          style={styles.parent}
+          resizeMode="contain"
+        />
+        {/* <Image source={BACKMASK} style={styles.mask} resizeMode="contain" /> */}
+        {maskList.map((data) => renderMask(data))}
+
+        <View style={styles.container}>
+          <Text style={styles.instructions}>지울 오브젝트를 선택하세요.</Text>
+          <View style={styles.item}>
+            {maskList.map((data) => renderCheckBox(data))}
+          </View>
+          <TouchableOpacity style={styles.button} onPress={handleRemove}>
+            <Icon style={{ fontSize: 25, color: "#999" }} name="loader" />
+            <Text style={styles.buttonText}>오브젝트 제거하기</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.button}>
-          <Icon style={{ fontSize: 25, color: "#999" }} name="loader" />
-          <Text style={styles.buttonText}>오브젝트 제거하기</Text>
-        </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -115,10 +130,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  logo: {
+  instructions: {
+    color: "#888",
+    fontSize: 18,
+    marginHorizontal: 15,
+    marginBottom: 10,
+  },
+  parent: {
     width: 400,
     height: 300,
     marginBottom: 20,
+    position: "relative",
+    opacity: 0.9,
+  },
+  mask: {
+    width: 400,
+    height: 300,
+    position: "absolute",
+    top: 0,
+    left: 5,
+    marginBottom: 20,
+    opacity: 0.75,
+    //backgroundColor: "rgba(255, 0, 0, 0.1)",
   },
   button: {
     flexDirection: "row",
@@ -132,14 +165,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  buttonText: {
+    fontSize: 15,
+    color: "#999",
+  },
   item: {
-    flexDirection: "column",
-    width: "80%",
-    backgroundColor: "#fff",
+    flexDirection: "row",
     borderRadius: 20,
     padding: 10,
-    marginBottom: 10,
-    flexDirection: "row",
+    marginBottom: 5,
   },
   checkBoxTxt: {
     borderRadius: 30,

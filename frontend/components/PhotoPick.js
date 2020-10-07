@@ -1,10 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import Camera from "./CameraView";
+import DefualtLoading from "./DefualtLoading";
 
-export default function PhotoPick({ state, setState, navigation }) {
+export default function PhotoPick({
+  state,
+  setState,
+  navigation,
+  onPressNext,
+}) {
+  const [loading, setLoading] = useState(false);
+
   let openImagePickerAsync = async () => {
     let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
 
@@ -14,14 +21,24 @@ export default function PhotoPick({ state, setState, navigation }) {
     }
 
     let pickerResult = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsMultipleSelection: true,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: false,
       allowsEditing: false,
       aspect: [4, 3],
       quality: 1,
     });
+    if (pickerResult.cancelled) {
+      return;
+    }
     console.log(pickerResult);
-    setState(pickerResult.uri);
+
+    setLoading(true);
+
+    setTimeout(function () {
+      setLoading(false);
+      setState(pickerResult);
+      onPressNext();
+    }, 1000);
   };
 
   const openCamera = async () => {
@@ -30,7 +47,12 @@ export default function PhotoPick({ state, setState, navigation }) {
 
   return (
     <View style={styles.container}>
-      <Image source={{ uri: state }} style={styles.logo} resizeMode="contain" />
+      <DefualtLoading state={loading} />
+      <Image
+        source={{ uri: state.uri }}
+        style={styles.logo}
+        resizeMode="contain"
+      />
       <Text style={styles.instructions}>수정할 사진을 선택하세요.</Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={openImagePickerAsync} style={styles.button}>
