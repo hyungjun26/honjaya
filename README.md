@@ -11,14 +11,15 @@
 ``` sh
 git clone https://lab.ssafy.com/s03-ai-sub3/s03p23a409.git
 cd s03p23a409
-conda create env -f environment.yml
+conda env create -f environment.yml
 ```
 
 Download the model and place it in the correct location.
+You can use download script (`bash install.sh`)
 
 |path|link|
 |----|----|
-|yolact/weights/|[download](https://drive.google.com/drive/folders/1rE1KyIPEa_a8yszWXx7t9g3AbUdZFHjd)|
+|yolact/weights/|[download](https://drive.google.com/drive/folders/1NFJQVP_h1WaXfV8ZfhVz6HJwKd2f6r7w)|
 |edge-connect/checkpoints/|[download](https://drive.google.com/drive/folders/1rE1KyIPEa_a8yszWXx7t9g3AbUdZFHjd)|
 
 
@@ -27,6 +28,7 @@ Download the model and place it in the correct location.
 ``` sh
 cd yolact
 python eval.py --trained_model=weights/yolact_base_54_800000.pth --score_threshold=0.15 --top_k=15 --image=images/input/example.jpg:images/output/example.png
+python eval.py --trained_model=weights/yolact_base_54_800000.pth --score_threshold=0.15 --top_k=15 --image=images/input/example.jpg:images/output/example.png --skip=[0] # 남길 오브젝트의 id
 ```
 
 ### Object Remove
