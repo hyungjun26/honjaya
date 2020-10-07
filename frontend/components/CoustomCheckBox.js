@@ -5,7 +5,7 @@ import { StyleSheet, Text } from "react-native";
 function CoustomCheckBox({ data, handleSelected }) {
   const [selected, setSelected] = useState(false);
   const handleCheckBox = () => {
-    handleSelected(data.no);
+    handleSelected(data.id);
     setSelected(!selected);
   };
   return (
@@ -18,7 +18,8 @@ function CoustomCheckBox({ data, handleSelected }) {
           fontWeight: selected ? "bold" : "normal",
         }}
       >
-        {data.name}
+        {data.type}
+        {data.id + 1}
       </Text>
     </>
   );

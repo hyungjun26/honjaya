@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import axios from "axios";
+import DefualtLoading from "./DefualtLoading";
 
 export default function ObjectDetect({
   state,
@@ -9,8 +10,10 @@ export default function ObjectDetect({
   setMaskList,
   setImageKey,
 }) {
+  const [loading, setLoading] = useState(false);
   const detectHandler = () => {
-    console.log(String(state.uri).length);
+    //console.log(String(state.uri).length);
+    setLoading(true);
     if (state.uri === "noimage") {
       alert("이미지를 선택해주세요!!");
       return;
@@ -25,12 +28,12 @@ export default function ObjectDetect({
     //console.log(formData);
     axios({
       method: "post",
-      url: "http://10.0.2.2:8000",
+      url: "http://1.233.63.235:8000",
       data: formData,
       headers: { "Content-Type": "multipart/form-data" },
     })
       .then((res) => {
-        console.log(res);
+        console.log(res.request);
         setImageKey(res.data.key);
         const temp = [];
         const array = res.data.objects;
@@ -43,16 +46,18 @@ export default function ObjectDetect({
             file: `data:image/png;base64,${array[idx].image}`,
           });
         }
+        setLoading(false);
         setMaskList(temp);
+        onPressNext();
       })
-      .catch((e) => {
-        console.log(e);
+      .catch(() => {
+        setLoading(false);
+        alert("오류가 발생했습니다.");
       });
-
-    onPressNext();
   };
   return (
     <View style={styles.container}>
+      <DefualtLoading state={loading} />
       <Image
         source={{ uri: state.uri }}
         style={styles.logo}

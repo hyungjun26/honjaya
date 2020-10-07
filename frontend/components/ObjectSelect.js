@@ -1,31 +1,44 @@
 import React, { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import CheckBox from "./CoustomCheckBox.js";
 import Icon from "react-native-vector-icons/Feather";
 import axios from "axios";
+import DefualtLoading from "./DefualtLoading";
 
 const initialState = [
   {
-    no: 0,
-    name: "people1",
+    id: 0,
+    type: "people1",
     selected: false,
     file: require("../dummy-image/mask1.png"),
   },
   {
-    no: 1,
-    name: "people2",
+    id: 1,
+    type: "people2",
     selected: false,
     file: require("../dummy-image/mask2.png"),
   },
 ];
 
-function ObjectSelect({ state, maskList, setMaskList, imageKey }) {
-  // const ORIGINAL = require("../dummy-image/original.jpg");
-  // const MASK1 = require("../dummy-image/mask1.png");
-  // const MASK2 = require("../dummy-image/mask2.png");
-  // const BACKMASK = require("../dummy-image/backgroundcolor_black.png");
-  // const [objectList, setObjectList] = useState(initialState);
+function ObjectSelect({
+  state,
+  maskList,
+  setMaskList,
+  imageKey,
+  setResultImg,
+  onPressNext,
+}) {
+  const [loading, setLoading] = useState(false);
   const handleSelected = (idx) => {
+    //console.log(maskList);
+    //console.log(idx);
     maskList[idx].selected = !maskList[idx].selected;
     setMaskList([...maskList]);
   };
@@ -38,7 +51,7 @@ function ObjectSelect({ state, maskList, setMaskList, imageKey }) {
     if (data.selected) {
       return (
         <Image
-          source={data.file}
+          source={{ uri: data.file }}
           style={styles.mask}
           resizeMode="contain"
           key={data.id}
@@ -48,6 +61,7 @@ function ObjectSelect({ state, maskList, setMaskList, imageKey }) {
   };
 
   const handleRemove = () => {
+    setLoading(true);
     const list = [];
     for (let idx = 0; idx < maskList.length; idx++) {
       if (maskList[idx].selected) {
@@ -57,39 +71,48 @@ function ObjectSelect({ state, maskList, setMaskList, imageKey }) {
 
     axios({
       method: "post",
-      url: "http://10.0.2.2:8000/select",
+      url: "http://1.233.63.235:8000/select",
       data: {
         key: imageKey,
         check: list,
       },
     })
-      .then(() => {
+      .then((res) => {
         console.log("checklist transfer success");
+        const resultImage = `data:image/png;base64,${res.data.objects[0].image}`;
+        setResultImg(resultImage);
+        setLoading(false);
+        onPressNext();
       })
       .catch((e) => {
-        console.log(e);
+        setLoading(false);
+        alert("오류가 발생했습니다.");
       });
   };
   return (
-    <View style={styles.container}>
-      <Image
-        source={{ uri: state.uri }}
-        style={styles.parent}
-        resizeMode="contain"
-      />
-      {/* <Image source={BACKMASK} style={styles.mask} resizeMode="contain" /> */}
-      {maskList.map((data) => renderMask(data))}
-
+    <ScrollView>
       <View style={styles.container}>
-        <View style={styles.item}>
-          {maskList.map((data) => renderCheckBox(data))}
+        <DefualtLoading state={loading} />
+        <Image
+          source={{ uri: state.uri }}
+          style={styles.parent}
+          resizeMode="contain"
+        />
+        {/* <Image source={BACKMASK} style={styles.mask} resizeMode="contain" /> */}
+        {maskList.map((data) => renderMask(data))}
+
+        <View style={styles.container}>
+          <Text style={styles.instructions}>지울 오브젝트를 선택하세요.</Text>
+          <View style={styles.item}>
+            {maskList.map((data) => renderCheckBox(data))}
+          </View>
+          <TouchableOpacity style={styles.button} onPress={handleRemove}>
+            <Icon style={{ fontSize: 25, color: "#999" }} name="loader" />
+            <Text style={styles.buttonText}>오브젝트 제거하기</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.button} onPress={handleRemove}>
-          <Icon style={{ fontSize: 25, color: "#999" }} name="loader" />
-          <Text style={styles.buttonText}>오브젝트 제거하기</Text>
-        </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -106,6 +129,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+  },
+  instructions: {
+    color: "#888",
+    fontSize: 18,
+    marginHorizontal: 15,
+    marginBottom: 10,
   },
   parent: {
     width: 400,
@@ -136,14 +165,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  buttonText: {
+    fontSize: 15,
+    color: "#999",
+  },
   item: {
-    flexDirection: "column",
-    width: "80%",
-    backgroundColor: "#fff",
+    flexDirection: "row",
     borderRadius: 20,
     padding: 10,
-    marginBottom: 10,
-    flexDirection: "row",
+    marginBottom: 5,
   },
   checkBoxTxt: {
     borderRadius: 30,

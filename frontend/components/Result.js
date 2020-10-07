@@ -10,14 +10,14 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
-export default function Result({ navigation }) {
+export default function Result({ navigation, resultImg }) {
   const HomeScreen = async () => {
     navigation.navigate("Home");
   };
   return (
     <View style={styles.container}>
       <Image
-        source={{ uri: "asset:/favicon.png" }}
+        source={{ uri: resultImg }}
         style={styles.logo}
         resizeMode="contain"
       />

@@ -35,8 +35,9 @@ const STEP = [0, 1, 2, 3];
 
 function ObjectRemoveScreen({ navigation }) {
   const [currentPage, setCurrentPage] = useState(0);
-  const [maskList, setMaskList] = useState(null);
+  const [maskList, setMaskList] = useState([]);
   const [imageKey, setImageKey] = useState(null);
+  const [resultImg, setResultImg] = useState(null);
   const [targetImg, setTargetImg] = useState({
     uri:
       "https://crestaproject.com/demo/lontano-pro/wp-content/themes/lontano-pro/images/no-image-slide.png",
@@ -79,13 +80,18 @@ function ObjectRemoveScreen({ navigation }) {
             maskList={maskList}
             imageKey={imageKey}
             setMaskList={setMaskList}
+            setResultImg={setResultImg}
           />
         </View>
       );
     } else if (data === 3) {
       return (
         <View key={data} style={styles.container}>
-          <Result navigation={navigation} />
+          <Result
+            navigation={navigation}
+            resultImg={resultImg}
+            onPressNext={onPressNext}
+          />
         </View>
       );
     }
@@ -136,7 +142,7 @@ function ObjectRemoveScreen({ navigation }) {
         index={currentPage}
         autoplay={false}
         showsPagination={false}
-        scrollEnabled={false}
+        scrollEnabled={true}
         onIndexChanged={(page) => {
           setCurrentPage(page);
         }}
