@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import axios from "axios";
 import DefualtLoading from "./DefualtLoading";
@@ -9,6 +16,7 @@ export default function ObjectDetect({
   onPressNext,
   setMaskList,
   setImageKey,
+  navigation,
 }) {
   const [loading, setLoading] = useState(false);
   const detectHandler = () => {
@@ -28,15 +36,28 @@ export default function ObjectDetect({
     //console.log(formData);
     axios({
       method: "post",
-      url: "http://1.233.63.235:8000",
+      url: "http://j3a409.p.ssafy.io/api/",
       data: formData,
       headers: { "Content-Type": "multipart/form-data" },
     })
       .then((res) => {
-        console.log(res.request);
+        //console.log(res);
         setImageKey(res.data.key);
         const temp = [];
         const array = res.data.objects;
+        if (array.length === 0) {
+          Alert.alert(
+            "오브젝트 디텍팅 에러",
+            "사진에서 오브젝트를 찾을수 없습니다. 다른 사진으로 시도해주세요!",
+            [
+              {
+                text: "ok",
+                onPress: navigation.goBack(),
+              },
+            ]
+          );
+          return;
+        }
         for (let idx = 0; idx < array.length; idx++) {
           const element = array[idx];
           temp.push({
@@ -50,7 +71,8 @@ export default function ObjectDetect({
         setMaskList(temp);
         onPressNext();
       })
-      .catch(() => {
+      .catch((e) => {
+        console.log(e);
         setLoading(false);
         alert("오류가 발생했습니다.");
       });

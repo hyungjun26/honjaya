@@ -19,6 +19,8 @@ const RemoveStack = createStackNavigator();
 const ResultStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
+const Stack = createStackNavigator();
+
 const HomeStackScreen = ({ navigation }) => (
   <HomeStack.Navigator
     screenOptions={{
@@ -176,14 +178,29 @@ const ResultStackScreen = ({ navigation }) => (
 
 export default function App() {
   return (
+    // <NavigationContainer>
+    //   <Drawer.Navigator initialRouteName="Home">
+    //     <Drawer.Screen name="Home" component={HomeStackScreen} />
+    //     <Drawer.Screen name="About" component={AboutStackScreen} />
+    //     <Drawer.Screen name="Guide" component={GuideStackScreen} />
+    //     <Drawer.Screen name="Object Remove" component={RemoveStackScreen} />
+    //     <Drawer.Screen name="Camera" component={CameraView} />
+    //   </Drawer.Navigator>
+    // </NavigationContainer>
     <NavigationContainer>
-      <Drawer.Navigator initialRouteName="Home">
-        <Drawer.Screen name="Home" component={HomeStackScreen} />
-        <Drawer.Screen name="About" component={AboutStackScreen} />
-        <Drawer.Screen name="Guide" component={GuideStackScreen} />
-        <Drawer.Screen name="Object Remove" component={RemoveStackScreen} />
-        <Drawer.Screen name="Camera" component={CameraView} />
-      </Drawer.Navigator>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: "#01A9DB",
+          },
+        }}
+      >
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="About" component={AboutScreen} />
+        <Stack.Screen name="Guide" component={GuideScreen} />
+        <Stack.Screen name="Object Remove" component={ObjectRemoveScreen} />
+        <Stack.Screen name="Camera" component={CameraView} />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }

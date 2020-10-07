@@ -68,6 +68,7 @@ function ObjectRemoveScreen({ navigation }) {
             onPressNext={onPressNext}
             setMaskList={setMaskList}
             setImageKey={setImageKey}
+            navigation={navigation}
           />
         </View>
       );
@@ -142,7 +143,7 @@ function ObjectRemoveScreen({ navigation }) {
         index={currentPage}
         autoplay={false}
         showsPagination={false}
-        scrollEnabled={true}
+        scrollEnabled={false}
         onIndexChanged={(page) => {
           setCurrentPage(page);
         }}

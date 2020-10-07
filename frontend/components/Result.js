@@ -8,12 +8,44 @@ import {
   View,
   Alert,
 } from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
+import * as MediaLibrary from "expo-media-library";
+import * as FileSystem from "expo-file-system";
 
 export default function Result({ navigation, resultImg }) {
   const HomeScreen = async () => {
     navigation.navigate("Home");
   };
+
+  const saveImg = async () => {
+    const save = resultImg.split("data:image/png;base64,")[1];
+    const today = new Date();
+    const timestamp = String(
+      "honjaya_" +
+        today.getFullYear() +
+        today.getMonth() +
+        today.getDate() +
+        "_" +
+        today.getHours() +
+        today.getMinutes() +
+        today.getSeconds() +
+        ".png"
+    );
+    console.log(timestamp);
+    const filename = FileSystem.documentDirectory + timestamp;
+    //console.log(filename);
+    await FileSystem.writeAsStringAsync(filename, save, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    const mediaResult = await MediaLibrary.saveToLibraryAsync(filename);
+
+    Alert.alert("저장되었습니다", "갤러리를 확인해주세요!", [
+      {
+        text: "ok",
+        onPress: HomeScreen,
+      },
+    ]);
+  };
+
   return (
     <View style={styles.container}>
       <Image
@@ -26,17 +58,7 @@ export default function Result({ navigation, resultImg }) {
         <TouchableOpacity onPress={HomeScreen} style={styles.button}>
           <Text style={styles.buttonText}>취소</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() =>
-            Alert.alert("저장되었습니다", "갤러리를 확인해주세요!", [
-              {
-                text: "ok",
-                onPress: HomeScreen,
-              },
-            ])
-          }
-          style={styles.button}
-        >
+        <TouchableOpacity onPress={saveImg} style={styles.button}>
           <Text style={styles.buttonText}>저장</Text>
         </TouchableOpacity>
       </View>

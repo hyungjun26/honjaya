@@ -1,8 +1,16 @@
 import React, { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import DefualtLoading from "./DefualtLoading";
+import * as FileSystem from "expo-file-system";
 
 export default function PhotoPick({
   state,
@@ -31,14 +39,28 @@ export default function PhotoPick({
       return;
     }
     console.log(pickerResult);
-
+    const uri = pickerResult.uri;
+    const info = await FileSystem.getInfoAsync(uri);
+    console.log(info);
+    if (info.size > 1500000) {
+      Alert.alert(
+        "사진 크기 제한!",
+        "크기가 1.5mb 이하인 사진을 선택해주세요.",
+        [
+          {
+            text: "ok",
+          },
+        ]
+      );
+      return;
+    }
     setLoading(true);
 
     setTimeout(function () {
       setLoading(false);
       setState(pickerResult);
       onPressNext();
-    }, 1000);
+    }, 500);
   };
 
   const openCamera = async () => {
